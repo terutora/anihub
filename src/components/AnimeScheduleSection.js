@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Clock } from 'lucide-react';
-import { fetchAnimeSchedule } from '@/lib/api-client';
+import { Clock, Tv } from 'lucide-react';
+import { fetchSyobocalData } from '@/lib/api-client';
 
 const AnimeScheduleSection = () => {
   const [schedules, setSchedules] = useState([]);
@@ -13,7 +13,7 @@ const AnimeScheduleSection = () => {
     const fetchSchedule = async () => {
       try {
         setIsLoading(true);
-        const data = await fetchAnimeSchedule();
+        const data = await fetchSyobocalData();
         const groupedSchedules = groupSchedules(data);
         setSchedules(groupedSchedules);
       } catch (error) {
@@ -44,8 +44,8 @@ const AnimeScheduleSection = () => {
     return Object.values(grouped).sort((a, b) => new Date(a.endTime) - new Date(b.endTime));
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (isLoading) return <div className="text-center py-12">Loading...</div>;
+  if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
 
   return (
     <section className="py-12">
@@ -55,11 +55,12 @@ const AnimeScheduleSection = () => {
           <ul className="space-y-4">
             {schedules.map((anime, index) => (
               <li key={index} className="flex items-center">
-                <Clock className="w-5 h-5 text-blue-500 mr-3" />
-                <span className="font-semibold mr-2">
+                <Tv className="w-5 h-5 text-blue-500 mr-3" />
+                <span className="font-semibold mr-2">{anime.title}</span>
+                <Clock className="w-4 h-4 text-gray-400 mr-1" />
+                <span className="text-sm text-gray-500 mr-2">
                   {new Date(anime.endTime).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}まで
                 </span>
-                <span className="mr-2">{anime.title}</span>
                 <span className="text-sm text-gray-500">
                   ({anime.publishers.join(', ')})
                 </span>

@@ -9,6 +9,17 @@ const nextConfig = {
       },
     ];
   },
-}
+
+  images: {
+    domains: [
+      'api.annict.com',
+      'narenare-anime.com',
+    ], // Annictの画像ドメインを追加
+    
+  },
+};
+
+
+module.exports = nextConfig
 
 module.exports = nextConfig
