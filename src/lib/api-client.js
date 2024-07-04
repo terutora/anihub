@@ -1,15 +1,11 @@
 import axios from 'axios';
 
 const annictClient = axios.create({
-  baseURL: 'https://api.annict.com/v1',
-  params: {
-    access_token: process.env.ANNICT_API_KEY
-  }
-});
-
-const syobocalClient = axios.create({
-  baseURL: 'https://cal.syoboi.jp/api/v1'
-});
+    baseURL: 'https://api.annict.com/v1',
+    params: {
+      access_token: process.env.NEXT_PUBLIC_ANNICT_API_KEY
+    }
+  });
 
 export const fetchAnimeList = async (params = {}) => {
   try {
@@ -23,13 +19,13 @@ export const fetchAnimeList = async (params = {}) => {
 
 export const fetchAnimeSchedule = async (start, end) => {
   try {
-    const response = await syobocalClient.get('/programs', {
-      params: {
-        start: start.toISOString(),
-        end: end.toISOString()
+    const response = await axios.get('/api/anime-schedule', {
+      params: { 
+        start: start.toISOString(), 
+        end: end.toISOString() 
       }
     });
-    return response.data.programs;
+    return response.data;
   } catch (error) {
     console.error('Error fetching anime schedule:', error);
     throw error;

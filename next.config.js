@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    domains: ['api.annict.com', 'cal.syoboi.jp'],
+  async rewrites() {
+    return [
+      {
+        source: '/api/syobocal',
+        destination: 'http://cal.syoboi.jp/rss.php',
+      },
+    ];
   },
 }
 

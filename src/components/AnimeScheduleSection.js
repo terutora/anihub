@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
+import { fetchAnimeSchedule } from '@/lib/api-client';
 
 const AnimeScheduleSection = () => {
   const [schedules, setSchedules] = useState([]);
@@ -15,11 +16,7 @@ const AnimeScheduleSection = () => {
 
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/schedule?start=${now.toISOString()}&end=${end.toISOString()}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch schedule');
-        }
-        const data = await response.json();
+        const data = await fetchAnimeSchedule(now, end);
         setSchedules(data);
       } catch (error) {
         console.error('Error fetching schedule:', error);
@@ -32,38 +29,29 @@ const AnimeScheduleSection = () => {
     fetchSchedule();
   }, []);
 
-  if (isLoading) {
-    return <div className="text-center">読み込み中...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  };
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
-    <section className="py-16 bg-gray-100">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">今後のアニメスケジュール</h2>
-        <p className="text-xl text-center text-gray-600 mb-12">
-          今後のエピソードを見逃さないようにしよう。
-        </p>
-        <div className="card p-6">
-          {schedules.length > 0 ? (
-            <ul className="space-y-4">
-              {schedules.map((anime, index) => (
-                <li key={index} className="flex items-center">
-                  <Clock className="w-5 h-5 text-blue-500 mr-3" />
-                  <span className="font-semibold mr-2">
-                    {new Date(anime.time).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  <span className="text-gray-700">{anime.title}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-center text-gray-500">現在予定されているアニメはありません。</p>
-          )}
-        </div>
+    <section className="py-12">
+      <h2 className="text-3xl font-bold text-center mb-8">今後のアニメスケジュール</h2>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        {schedules.length > 0 ? (
+          <ul className="space-y-4">
+            {schedules.map((anime, index) => (
+              <li key={index} className="flex items-center">
+                <Clock className="w-5 h-5 text-blue-500 mr-3" />
+                <span className="font-semibold mr-2">
+                  {new Date(anime.startTime).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="mr-2">{anime.title}</span>
+                <span className="text-sm text-gray-500">({anime.publisher})</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-center text-gray-500">現在予定されているアニメはありません。</p>
+        )}
       </div>
     </section>
   );

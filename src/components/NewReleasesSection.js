@@ -26,13 +26,8 @@ const NewReleasesSection = () => {
     fetchNewReleases();
   }, []);
 
-  if (isLoading) {
-    return <div className="text-center">読み込み中...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <section className="py-12">
@@ -42,7 +37,9 @@ const NewReleasesSection = () => {
         {animeList.map((anime) => (
           <div key={anime.id} className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold mb-2">{anime.title}</h3>
-            <p className="text-gray-600 mb-4">{anime.synopsis.slice(0, 100)}...</p>
+            <p className="text-gray-600 mb-4">
+                {anime.synopsis ? `${anime.synopsis.slice(0, 100)}...` : 'No synopsis available'}
+            </p>
             <div className="flex items-center">
               <Star className="w-5 h-5 text-yellow-400 mr-1" />
               <span>{anime.watchers_count} watchers</span>
