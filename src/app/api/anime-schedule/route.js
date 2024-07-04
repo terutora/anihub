@@ -3,7 +3,7 @@ import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 
 export async function GET(request) {
-  console.log('Received request for anime schedule');
+  console.log('Received request for current anime schedule');
 
   try {
     console.log('Fetching from Syoboi Calendar');
@@ -20,27 +20,30 @@ export async function GET(request) {
     const result = parser.parse(response.data);
     
     console.log('XML parsed successfully');
-    console.log('Parsed result structure:', JSON.stringify(result, null, 2).substring(0, 1000));
 
     const items = result['rdf:RDF'].item;
-    console.log('Items:', items);
+    console.log('Total items:', items ? items.length : 0);
 
+    const now = new Date();
     const schedules = Array.isArray(items) 
-      ? items.map(item => ({
-          title: item.title,
-          date: item['dc:date'],
-          publisher: item['dc:publisher'],
-          genre: item['tv:feed']['tv:genre'],
-          startTime: item['tv:feed']['tv:startDatetime'],
-          endTime: item['tv:feed']['tv:endDatetime']
-        }))
+      ? items
+          .map(item => ({
+            title: item.title,
+            date: item['dc:date'],
+            publisher: item['dc:publisher'],
+            genre: item['tv:feed']['tv:genre'],
+            startTime: new Date(item['tv:feed']['tv:startDatetime']),
+            endTime: new Date(item['tv:feed']['tv:endDatetime'])
+          }))
+          .filter(item => item.startTime <= now && item.endTime > now)
+          .sort((a, b) => a.endTime - b.endTime)
       : [];
 
-    console.log(`Extracted ${schedules.length} schedules`);
+    console.log(`Extracted ${schedules.length} current schedules`);
 
     if (schedules.length === 0) {
-      console.log('No schedules found');
-      return NextResponse.json({ message: 'No schedules found', parsedResult: result['rdf:RDF'] });
+      console.log('No current schedules found');
+      return NextResponse.json({ message: 'No current schedules found' });
     }
 
     return NextResponse.json(schedules);

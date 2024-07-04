@@ -17,14 +17,9 @@ export const fetchAnimeList = async (params = {}) => {
   }
 };
 
-export const fetchAnimeSchedule = async (start, end) => {
+export const fetchAnimeSchedule = async () => {
   try {
-    const response = await axios.get('/api/anime-schedule', {
-      params: { 
-        start: start.toISOString(), 
-        end: end.toISOString() 
-      }
-    });
+    const response = await axios.get('/api/anime-schedule');
     return response.data;
   } catch (error) {
     console.error('Error fetching anime schedule:', error);
