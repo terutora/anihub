@@ -1,8 +1,12 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 
 const AnimeScheduleSection = () => {
   const [schedules, setSchedules] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -10,6 +14,7 @@ const AnimeScheduleSection = () => {
       const end = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24時間後
 
       try {
+        setIsLoading(true);
         const response = await fetch(`/api/schedule?start=${now.toISOString()}&end=${end.toISOString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch schedule');
@@ -18,12 +23,22 @@ const AnimeScheduleSection = () => {
         setSchedules(data);
       } catch (error) {
         console.error('Error fetching schedule:', error);
-        // エラー処理をここに追加（例: ユーザーへの通知）
+        setError('スケジュールの取得に失敗しました。後でもう一度お試しください。');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchSchedule();
   }, []);
+
+  if (isLoading) {
+    return <div className="text-center">読み込み中...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  };
 
   return (
     <section className="py-16 bg-gray-100">
