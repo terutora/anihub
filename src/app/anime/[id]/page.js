@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Star, Calendar, Clock, Tv, Users, BarChart } from 'lucide-react';
+import Image from 'next/image';
+import { isValidImageUrl } from '@/utils/imageValidation';
 
 const AnimeDetailPage = () => {
   const { id } = useParams();
@@ -12,19 +13,21 @@ const AnimeDetailPage = () => {
 
   useEffect(() => {
     const fetchAnimeDetail = async () => {
-      console.log('Fetching anime detail for id:', id);
+      console.log('Client: Fetching anime detail for id:', id);
       try {
         setIsLoading(true);
         const response = await fetch(`/api/annict/anime/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch anime details');
-        }
         const data = await response.json();
-        console.log('Fetched anime data:', data);
+
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+
+        console.log('Client: Fetched anime data:', data);
         setAnime(data);
       } catch (error) {
-        console.error('Error fetching anime details:', error);
-        setError('アニメ情報の取得に失敗しました。後でもう一度お試しください。');
+        console.error('Client: Error fetching anime details:', error);
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -33,72 +36,71 @@ const AnimeDetailPage = () => {
     fetchAnimeDetail();
   }, [id]);
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-  </div>;
-  if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
-  if (!anime) return <div className="text-center py-12">アニメが見つかりません。</div>;
+  if (isLoading) return <div className="container mx-auto px-4 py-8 text-center">Loading...</div>;
+  if (error) return <div className="container mx-auto px-4 py-8 text-center text-red-500">Error: {error}</div>;
+  if (!anime) return <div className="container mx-auto px-4 py-8 text-center">No anime data found</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white shadow-2xl rounded-lg overflow-hidden">
         <div className="md:flex">
-          <div className="md:flex-shrink-0">
-            <img className="h-64 w-full object-cover md:w-64" src={anime.images?.recommended_url || '/placeholder-image.jpg'} alt={anime.title} />
+          <div className="md:w-1/3 p-4">
+            {anime.imageUrl && isValidImageUrl(anime.imageUrl) ? (
+              <Image
+                src={anime.imageUrl}
+                alt={anime.title}
+                width={400}
+                height={600}
+                className="w-full h-auto object-cover rounded-lg"
+                priority={true}
+                loading="eager"
+              />
+            ) : (
+              <div className="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
+                <span className="text-gray-500">No Image Available</span>
+              </div>
+            )}
           </div>
-          <div className="p-8">
-            <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">{anime.media_text}</div>
-            <h1 className="mt-1 text-4xl font-bold text-gray-900">{anime.title}</h1>
-            
-            <div className="mt-4 flex flex-wrap">
-              <div className="mr-4 mb-2">
-                <div className="flex items-center">
-                  <Star className="h-5 w-5 text-yellow-400" />
-                  <span className="ml-1 font-semibold">{anime.rating_average?.toFixed(1) || 'N/A'}</span>
-                </div>
-                <div className="text-sm text-gray-500">Rating</div>
-              </div>
-              
-              <div className="mr-4 mb-2">
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 text-blue-400" />
-                  <span className="ml-1 font-semibold">{anime.watchers_count}</span>
-                </div>
-                <div className="text-sm text-gray-500">Watchers</div>
-              </div>
-              
-              <div className="mr-4 mb-2">
-                <div className="flex items-center">
-                  <BarChart className="h-5 w-5 text-green-400" />
-                  <span className="ml-1 font-semibold">{anime.episodes_count}</span>
-                </div>
-                <div className="text-sm text-gray-500">Episodes</div>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <h2 className="text-xl font-semibold text-gray-900">Synopsis</h2>
-              <p className="mt-2 text-gray-600">{anime.synopsis}</p>
-            </div>
-            
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:w-2/3 p-8">
+            <h1 className="text-3xl font-bold mb-4">{anime.title}</h1>
+            <p className="text-xl text-gray-600 mb-6">{anime.media_text}</p>
+            <div className="grid md:grid-cols-2 gap-4 mb-8">
               <div>
-                <div className="flex items-center text-gray-700">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  <span>{anime.season_name_text}</span>
-                </div>
+                <strong className="text-gray-700">Season:</strong> {anime.season_name_text}
               </div>
-              
               <div>
-                <div className="flex items-center text-gray-700">
-                  <Tv className="h-5 w-5 mr-2" />
-                  <span>{anime.broadcast_text || 'Broadcast information not available'}</span>
-                </div>
+                <strong className="text-gray-700">Episodes:</strong> {anime.episodes_count}
+              </div>
+              <div>
+                <strong className="text-gray-700">Watchers:</strong> {anime.watchers_count}
+              </div>
+              <div>
+                <strong className="text-gray-700">Rating:</strong> {anime.rating_average ? anime.rating_average.toFixed(1) : 'N/A'}
               </div>
             </div>
+            <h2 className="text-2xl font-semibold mb-4">Synopsis</h2>
+            <p className="text-gray-700 leading-relaxed">{anime.synopsis}</p>
           </div>
         </div>
       </div>
+      {anime.otherImages && anime.otherImages.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Additional Images</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {anime.otherImages.map((imgUrl, index) => (
+              <Image
+                key={index}
+                src={imgUrl}
+                alt={`Additional image ${index + 1}`}
+                width={200}
+                height={200}
+                className="w-full h-auto object-cover rounded-lg"
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -11,13 +11,18 @@ const nextConfig = {
   },
 
   images: {
-    domains: [
-      'api.annict.com',
-      'narenare-anime.com',
-    ], // Annictの画像ドメインを追加
-    
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
-};
+  experimental: {
+    optimizeCss: true, // CSSの最適化
+    optimizeImages: true, // 画像の最適化
+  },
+}
 
 
 module.exports = nextConfig

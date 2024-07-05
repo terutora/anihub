@@ -1,36 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Clock, Tv } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Clock, Tv, RefreshCw } from 'lucide-react';
 import { fetchSyobocalData } from '@/lib/api-client';
 
 const AnimeScheduleSection = () => {
   const [schedules, setSchedules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchSyobocalData();
-        const groupedSchedules = groupSchedules(data);
-        setSchedules(groupedSchedules);
-      } catch (error) {
-        console.error('Error fetching schedule:', error);
-        setError('スケジュールの取得に失敗しました。後でもう一度お試しください。');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSchedule();
-    const intervalId = setInterval(fetchSchedule, 600000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const groupSchedules = (data) => {
+  const groupSchedules = useCallback((data) => {
     const grouped = data.reduce((acc, curr) => {
       const key = `${curr.title}-${curr.endTime}`;
       if (!acc[key]) {
@@ -42,6 +23,31 @@ const AnimeScheduleSection = () => {
     }, {});
 
     return Object.values(grouped).sort((a, b) => new Date(a.endTime) - new Date(b.endTime));
+  }, []);
+
+  const fetchSchedule = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      const data = await fetchSyobocalData();
+      const groupedSchedules = groupSchedules(data);
+      setSchedules(groupedSchedules);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching schedule:', error);
+      setError('スケジュールの取得に失敗しました。後でもう一度お試しください。');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [groupSchedules]);
+
+  useEffect(() => {
+    fetchSchedule();
+  }, [fetchSchedule]);
+
+  const handleRefresh = () => {
+    fetchSchedule();
   };
 
   if (isLoading) return <div className="text-center py-12">Loading...</div>;
@@ -49,7 +55,26 @@ const AnimeScheduleSection = () => {
 
   return (
     <section className="py-12">
-      <h2 className="text-3xl font-bold text-center mb-8">現在放送中のアニメ</h2>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold">現在放送中のアニメ</h2>
+        <div className="flex items-center">
+          {lastUpdated && (
+            <span className="text-sm text-gray-500 mr-4">
+              最終更新: {lastUpdated.toLocaleTimeString('ja-JP')}
+            </span>
+          )}
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className={`flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors ${
+              isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            更新
+          </button>
+        </div>
+      </div>
       <div className="bg-white p-6 rounded-lg shadow-md">
         {schedules.length > 0 ? (
           <ul className="space-y-4">
