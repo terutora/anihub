@@ -25,7 +25,7 @@ const AnimeScheduleSection = () => {
     };
 
     fetchSchedule();
-    const intervalId = setInterval(fetchSchedule, 60000);
+    const intervalId = setInterval(fetchSchedule, 600000);
 
     return () => clearInterval(intervalId);
   }, []);

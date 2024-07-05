@@ -38,15 +38,25 @@ function getCurrentSeason() {
 };
 
 export const fetchAnimeDetail = async (id) => {
+  console.log('Fetching anime detail with id:', id);
+
   try {
-    const response = await annictClient.get(`/works/${id}`, {
+    const response = await annictClient.get('/works', {
       params: {
-        fields: 'id,title,media,image,media_text,season_name_text,episodes_count,watchers_count,rating_average,synopsis,broadcast_text'
+        filter_ids: id,
+        fields: 'id,title,media,images,media_text,season_name_text,episodes_count,watchers_count,rating_average,synopsis,broadcast_text',
+        access_token: process.env.NEXT_PUBLIC_ANNICT_API_KEY
       }
     });
-    return response.data.work;
+    console.log('Annict API response:', response.data);
+    
+    if (response.data.works && response.data.works.length > 0) {
+      return response.data.works[0];
+    } else {
+      throw new Error('No anime found with the given ID');
+    }
   } catch (error) {
-    console.error('Error fetching anime detail:', error);
+    console.error('Error fetching anime detail:', error.response ? error.response.data : error.message);
     throw error;
   }
 };
