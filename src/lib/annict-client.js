@@ -45,8 +45,7 @@ export const fetchAnimeDetail = async (id) => {
     const response = await annictClient.get('/works', {
       params: {
         filter_ids: id,
-        fields: 'id,title,media,images,media_text,season_name_text,episodes_count,watchers_count,rating_average,synopsis,broadcast_text',
-      }
+        }
     });
     console.log('Annict client: Full API response:', JSON.stringify(response.data, null, 2));
     
@@ -76,3 +75,29 @@ function getImageUrl(images) {
   if (images.twitter && images.twitter.image_url) return images.twitter.image_url;
   return null; // 適切な画像URLが見つからない場合
 }
+
+export const fetchAnimeCasts = async (workId) => {
+  console.log('Annict client: Fetching casts for work id:', workId);
+
+  try {
+    const response = await annictClient.get('/casts', {
+      params: {
+        filter_work_id: workId,
+        per_page: 50,
+        sort_id: 'asc',
+        fields: 'id,name,character.id,character.name,person.id,person.name'
+      }
+    });
+    console.log('Annict client: Casts API response:', JSON.stringify(response.data, null, 2));
+    
+    return response.data.casts;
+  } catch (error) {
+    console.error('Annict client: Error fetching casts:', error.message);
+    if (error.response) {
+      console.error('Error response:', JSON.stringify(error.response.data, null, 2));
+      console.error('Error status:', error.response.status);
+      console.error('Error headers:', error.response.headers);
+    }
+    throw error;
+  }
+};
