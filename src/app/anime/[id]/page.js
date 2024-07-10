@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { isValidImageUrl } from '@/utils/imageValidation';
 import { fetchAnimeDetail, fetchAnimeCasts } from '@/lib/annict-client';
-import { Star, Calendar, Clock, Users, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, ExternalLink, BookOpen, Hash } from 'lucide-react';
 
 const AnimeDetailPage = () => {
   const { id } = useParams();
@@ -68,21 +68,25 @@ const AnimeDetailPage = () => {
             <div>
               <h1 className="text-3xl font-bold mb-4 text-black">{anime.title}</h1>
               <p className="text-gray-600 mb-6">{anime.media_text}</p>
-              <p className="text-black mb-6 leading-relaxed">{anime.synopsis}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-gray-600" />
-                <span><strong>シーズン:</strong> {anime.season_name_text}</span>
+              <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+                <div className="flex items-center">
+                  <Calendar className="w-5 h-5 mr-2 text-gray-600" />
+                  <span><strong>シーズン:</strong> {anime.season_name_text}</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-gray-600" />
+                  <span><strong>エピソード数:</strong> {anime.episodes_count}</span>
+                </div>
+                {anime.twitter_hashtag && (
+                  <div className="flex items-center col-span-2">
+                    <Hash className="w-5 h-5 mr-2 text-gray-600" />
+                    <span><strong>ハッシュタグ:</strong> #{anime.twitter_hashtag}</span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-gray-600" />
-                <span><strong>エピソード数:</strong> {anime.episodes_count}</span>
-              </div>
-              
             </div>
-            {anime.official_site_url && (
-              <div className="mt-6">
+            <div className="flex space-x-4">
+              {anime.official_site_url && (
                 <a
                   href={anime.official_site_url}
                   target="_blank"
@@ -92,8 +96,19 @@ const AnimeDetailPage = () => {
                   <ExternalLink className="w-5 h-5 mr-2" />
                   公式サイト
                 </a>
-              </div>
-            )}
+              )}
+              {anime.wikipedia_url && (
+                <a
+                  href={anime.wikipedia_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-black bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Wikipedia
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

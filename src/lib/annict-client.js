@@ -101,3 +101,18 @@ export const fetchAnimeCasts = async (workId) => {
     throw error;
   }
 };
+
+export const fetchAnnictData = async (query) => {
+  try {
+    const response = await annictClient.get('/works', {
+      params: {
+        filter_title: query,
+        per_page: 20
+      }
+    });
+    return response.data.works;
+  } catch (error) {
+    console.error('Error fetching Annict data:', error);
+    throw error;
+  }
+};
