@@ -4,8 +4,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/syobocal',
-        destination: 'http://cal.syoboi.jp/rss.php',
+        source: "/api/syobocal",
+        destination: "http://cal.syoboi.jp/rss.php",
       },
     ];
   },
@@ -13,18 +13,15 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
   experimental: {
-    optimizeCss: true, // CSSの最適化
-    optimizeImages: true, // 画像の最適化
+    optimizeCss: true, // CSSの最適化はそのまま
+    // optimizeImagesは削除
   },
-}
+};
 
-
-module.exports = nextConfig
-
-module.exports = nextConfig
+module.exports = nextConfig;

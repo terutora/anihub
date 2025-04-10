@@ -1,25 +1,29 @@
-import axios from 'axios';
+import axios from "axios";
+import { fetchCurrentSeasonAnime } from "./annict-client";
+import { fetchCurrentAnimeSchedule } from "./syobocal-client";
+
+export { fetchCurrentSeasonAnime, fetchCurrentAnimeSchedule };
 
 const annictClient = axios.create({
-  baseURL: 'https://api.annict.com/v1',
+  baseURL: "https://api.annict.com/v1",
   params: {
-    access_token: process.env.NEXT_PUBLIC_ANNICT_API_KEY
-  }
+    access_token: process.env.NEXT_PUBLIC_ANNICT_API_KEY,
+  },
 });
 
 export const fetchCurrentSeasonAnime = async () => {
   try {
-    const response = await annictClient.get('/works', {
+    const response = await annictClient.get("/works", {
       params: {
         filter_season: getCurrentSeason(),
-        sort_watchers_count: 'desc',
-        per_page: 10
-      }
+        sort_watchers_count: "desc",
+        per_page: 10,
+      },
     });
-    console.log('Annict API response:', response.data);
+    console.log("Annict API response:", response.data);
     return response.data.works;
   } catch (error) {
-    console.error('Error fetching current season anime:', error);
+    console.error("Error fetching current season anime:", error);
     throw error;
   }
 };
@@ -30,40 +34,40 @@ function getCurrentSeason() {
   const month = now.getMonth() + 1;
   let season;
 
-  if (month >= 1 && month <= 3) season = 'winter';
-  else if (month >= 4 && month <= 6) season = 'spring';
-  else if (month >= 7 && month <= 9) season = 'summer';
-  else season = 'autumn';
+  if (month >= 1 && month <= 3) season = "winter";
+  else if (month >= 4 && month <= 6) season = "spring";
+  else if (month >= 7 && month <= 9) season = "summer";
+  else season = "autumn";
 
   return `${year}-${season}`;
-};
+}
 
 export const fetchAnimeDetail = async (id) => {
-  console.log('Annict client: Fetching anime detail with id:', id);
+  console.log("Annict client: Fetching anime detail with id:", id);
 
   try {
-    const response = await annictClient.get('/works', {
+    const response = await annictClient.get("/works", {
       params: {
         filter_ids: id,
-        }
+      },
     });
-    console.log('Annict client: Full API response:', JSON.stringify(response.data, null, 2));
-    
+    console.log("Annict client: Full API response:", JSON.stringify(response.data, null, 2));
+
     if (response.data.works && response.data.works.length > 0) {
       const animeDetail = response.data.works[0];
-      console.log('Annict client: Matching anime found:', animeDetail);
-      
+      console.log("Annict client: Matching anime found:", animeDetail);
+
       // 画像URLの取得
       if (animeDetail.images) {
         animeDetail.imageUrl = getImageUrl(animeDetail.images);
       }
-      
+
       return animeDetail;
     }
-    console.log('Annict client: No matching anime found for ID:', id);
+    console.log("Annict client: No matching anime found for ID:", id);
     return null;
   } catch (error) {
-    console.error('Annict client: Error fetching anime detail:', error.response ? error.response.data : error.message);
+    console.error("Annict client: Error fetching anime detail:", error.response ? error.response.data : error.message);
     throw error;
   }
 };
@@ -77,42 +81,37 @@ function getImageUrl(images) {
 }
 
 export const fetchAnimeCasts = async (workId) => {
-  console.log('Annict client: Fetching casts for work id:', workId);
+  console.log("Annict client: Fetching casts for work id:", workId);
 
   try {
-    const response = await annictClient.get('/casts', {
+    const response = await annictClient.get("/casts", {
       params: {
         filter_work_id: workId,
         per_page: 50,
-        sort_id: 'asc',
-        fields: 'id,name,character.id,character.name,person.id,person.name'
-      }
+        sort_id: "asc",
+        fields: "id,name,character.id,character.name,person.id,person.name",
+      },
     });
-    console.log('Annict client: Casts API response:', JSON.stringify(response.data, null, 2));
-    
+    console.log("Annict client: Casts API response:", JSON.stringify(response.data, null, 2));
+
     return response.data.casts;
   } catch (error) {
-    console.error('Annict client: Error fetching casts:', error.message);
+    console.error("Annict client: Error fetching casts:", error.message);
     if (error.response) {
-      console.error('Error response:', JSON.stringify(error.response.data, null, 2));
-      console.error('Error status:', error.response.status);
-      console.error('Error headers:', error.response.headers);
+      console.error("Error response:", JSON.stringify(error.response.data, null, 2));
+      console.error("Error status:", error.response.status);
+      console.error("Error headers:", error.response.headers);
     }
     throw error;
   }
 };
 
-export const fetchAnnictData = async (query) => {
+export const fetchAnnictData = async () => {
   try {
-    const response = await annictClient.get('/works', {
-      params: {
-        filter_title: query,
-        per_page: 20
-      }
-    });
-    return response.data.works;
+    const response = await axios.get("/api/annict");
+    return response.data;
   } catch (error) {
-    console.error('Error fetching Annict data:', error);
+    console.error("Error fetching Annict data:", error);
     throw error;
   }
 };
