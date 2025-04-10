@@ -1,8 +1,10 @@
 import axios from "axios";
-import { fetchCurrentSeasonAnime } from "./annict-client";
+// 循環インポートを削除
+// import { fetchCurrentSeasonAnime } from "./annict-client";
 import { fetchCurrentAnimeSchedule } from "./syobocal-client";
 
-export { fetchCurrentSeasonAnime, fetchCurrentAnimeSchedule };
+// 以下の行も削除（後で個別に関数をエクスポートする）
+// export { fetchCurrentSeasonAnime, fetchCurrentAnimeSchedule };
 
 const annictClient = axios.create({
   baseURL: "https://api.annict.com/v1",
@@ -106,12 +108,20 @@ export const fetchAnimeCasts = async (workId) => {
   }
 };
 
-export const fetchAnnictData = async () => {
+export const fetchAnnictData = async (query) => {
   try {
-    const response = await axios.get("/api/annict");
-    return response.data;
+    const response = await annictClient.get("/works", {
+      params: {
+        filter_title: query,
+        per_page: 20,
+      },
+    });
+    return response.data.works;
   } catch (error) {
     console.error("Error fetching Annict data:", error);
     throw error;
   }
 };
+
+// ファイルの最後に明示的にfetchCurrentAnimeScheduleをエクスポート
+export { fetchCurrentAnimeSchedule };

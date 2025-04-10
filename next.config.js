@@ -20,7 +20,7 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true, // CSSの最適化はそのまま
-    // optimizeImagesは削除
+    // optimizeImagesオプションを削除（サポートされていない）
   },
 };
 
