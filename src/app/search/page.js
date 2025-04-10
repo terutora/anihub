@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { searchAnime } from '@/lib/api-client';
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { searchAnime } from "@/lib/api-client";
 
+// クライアントコンポーネントを分離
 const SearchResults = () => {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q');
+  const query = searchParams.get("q");
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,7 +22,7 @@ const SearchResults = () => {
         const data = await searchAnime(query);
         setResults(data);
       } catch (err) {
-        setError('検索結果の取得中にエラーが発生しました。');
+        setError("検索結果の取得中にエラーが発生しました。");
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -55,4 +56,16 @@ const SearchResults = () => {
   );
 };
 
-export default SearchResults;
+// 必要なインポートを追加
+import { useState, useEffect } from "react";
+
+// メインのページコンポーネント
+const SearchPage = () => {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">検索データを読み込み中...</div>}>
+      <SearchResults />
+    </Suspense>
+  );
+};
+
+export default SearchPage;

@@ -1,13 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { searchAnime } from '@/lib/api-client';
+import React, { useState, useEffect } from "react";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { searchAnime } from "@/lib/api-client";
 
-const SearchResultsPage = () => {
+// 実際の検索結果を表示するコンポーネント
+const SearchResultsContent = () => {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q');
+  const query = searchParams.get("q");
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,7 +21,7 @@ const SearchResultsPage = () => {
         const data = await searchAnime(query);
         setResults(data);
       } catch (err) {
-        setError('検索結果の取得中にエラーが発生しました。');
+        setError("検索結果の取得中にエラーが発生しました。");
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -52,6 +54,15 @@ const SearchResultsPage = () => {
         </ul>
       )}
     </div>
+  );
+};
+
+// メインのページコンポーネント
+const SearchResultsPage = () => {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">検索結果を読み込み中...</div>}>
+      <SearchResultsContent />
+    </Suspense>
   );
 };
 
